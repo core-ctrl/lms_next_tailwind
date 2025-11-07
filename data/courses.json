@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "title": "Intro to Web Dev",
+    "description": "HTML, CSS, JavaScript fundamentals."
+  },
+  {
+    "id": 2,
+    "title": "React Basics",
+    "description": "Components, props, state, hooks."
+  },
+  {
+    "id": 3,
+    "title": "Next.js & Tailwind",
+    "description": "Build production-ready frontends."
+  }
+]
