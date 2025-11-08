@@ -32,3 +32,4 @@ Additional features added:
 - Dual roles: Admin & Student (AuthContext)
 - Admin can change password, create courses, create tests, upload resources (YouTube link or MP4/PDF uploaded to public/uploads)
 - Student dashboard shows courses, tests, and can preview videos/PDFs.
+"# lms_next_tailwind" 
