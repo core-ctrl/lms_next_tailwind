@@ -34,3 +34,4 @@ A modern LMS platform built using:
 - Hero Section + Modern UI
 
 ## 📁 Project Structure
+# LMS
