@@ -1,30 +1,18 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
+import { createSlice } from "@reduxjs/toolkit";
+import coursesData from "@/data/courses.json";
 
-export const fetchCourses = createAsyncThunk('courses/fetch', async () => {
-  const res = await axios.get('/api/courses')
-  return res.data
-})
-
-const coursesSlice = createSlice({
-  name: 'courses',
+const courseSlice = createSlice({
+  name: "courses",
   initialState: {
-    items: [],
-    status: 'idle',
-    error: null
+    allCourses: coursesData,
+    enrolled: [],
   },
   reducers: {
-    addCourseLocal: (state, action) => {
-      state.items.push(action.payload)
-    }
+    enrollCourse(state, action) {
+      state.enrolled.push(action.payload);
+    },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchCourses.pending, (state) => { state.status = 'loading' })
-      .addCase(fetchCourses.fulfilled, (state, action) => { state.status = 'succeeded'; state.items = action.payload })
-      .addCase(fetchCourses.rejected, (state, action) => { state.status = 'failed'; state.error = action.error.message })
-  }
-})
+});
 
-export const { addCourseLocal } = coursesSlice.actions
-export default coursesSlice.reducer
+export const { enrollCourse } = courseSlice.actions;
+export default courseSlice.reducer;

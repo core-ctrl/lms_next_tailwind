@@ -1,10 +1,16 @@
-import { configureStore } from '@reduxjs/toolkit'
-import coursesReducer from './slices/coursesSlice'
-import testsReducer from './slices/testsSlice'
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./slices/authSlice";
+import courseReducer from "./slices/courseSlice";
+import uiReducer from "./slices/uiSlice";
+import testReducer from "./slices/testSlice";
 
 export const store = configureStore({
   reducer: {
-    courses: coursesReducer,
-    tests: testsReducer
-  }
-})
+    auth: authReducer,
+    courses: courseReducer,
+    ui: uiReducer,
+    tests: testReducer,
+  },
+});
+
+export default store;

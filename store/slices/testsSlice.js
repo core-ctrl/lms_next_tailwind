@@ -1,15 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
+import tests from "@/data/tests.json";
 
-const testsSlice = createSlice({
-  name: 'tests',
+const testSlice = createSlice({
+  name: "tests",
   initialState: {
-    items: []
+    allTests: tests,
   },
-  reducers: {
-    setTests: (state, action) => { state.items = action.payload },
-    addTest: (state, action) => { state.items.push(action.payload) }
-  }
-})
+  reducers: {},
+});
 
-export const { setTests, addTest } = testsSlice.actions
-export default testsSlice.reducer
+export default testSlice.reducer;

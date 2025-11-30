@@ -1,40 +1,70 @@
-import { useState } from 'react'
-import { useRouter } from 'next/router'   // ✅ import added
+import { useState } from "react";
 
 export default function CreateTest() {
-  const [title, setTitle] = useState('')
-  const [desc, setDesc] = useState('')
-  const router = useRouter()              // ✅ initialize router
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [url, setUrl] = useState("");
+  const [msg, setMsg] = useState("");
 
-  async function submit(e) {
-    e.preventDefault()
-    const tests = JSON.parse(localStorage.getItem('lms_tests') || '[]')
-    const id = tests.length ? Math.max(...tests.map(t => t.id)) + 1 : 1
-    tests.push({ id, title, description: desc })
-    localStorage.setItem('lms_tests', JSON.stringify(tests))
-    router.push('/admin/dashboard')       // ✅ now works fine
-  }
+  const handleSave = () => {
+    if (!title.trim()) return alert("Title required");
+
+    const newTest = {
+      id: Date.now().toString(),
+      title,
+      description,
+      url,
+    };
+
+    // Load previous tests
+    const saved = JSON.parse(localStorage.getItem("tests") || "[]");
+
+    // Add new test
+    saved.push(newTest);
+
+    // Save back
+    localStorage.setItem("tests", JSON.stringify(saved));
+
+    setMsg("✅ Test Created Successfully!");
+
+    setTitle("");
+    setDescription("");
+    setUrl("");
+  };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">Create Test</h2>
-      <form onSubmit={submit} className="space-y-3">
-        <input
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder="Title"
-          className="w-full p-2 border rounded"
-        />
-        <textarea
-          value={desc}
-          onChange={e => setDesc(e.target.value)}
-          placeholder="Description"
-          className="w-full p-2 border rounded"
-        />
-        <button className="px-3 py-1 bg-indigo-600 text-white rounded">
-          Create Test
-        </button>
-      </form>
+    <div className="max-w-xl mx-auto p-8">
+      <h1 className="text-3xl font-bold mb-6">Create Test</h1>
+
+      <input
+        className="w-full p-3 border rounded mb-3"
+        placeholder="Test Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+
+      <textarea
+        className="w-full p-3 border rounded mb-3"
+        placeholder="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+
+      <input
+        className="w-full p-3 border rounded mb-3"
+        placeholder="Optional URL (e.g., Google Form)"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+      />
+
+      <button
+        onClick={handleSave}
+        className="w-full bg-blue-600 text-white py-3 rounded"
+      >
+        Save Test
+      </button>
+
+      {msg && <p className="mt-3 text-green-600">{msg}</p>}
     </div>
-  )
+  );
 }

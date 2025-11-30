@@ -1,65 +1,184 @@
-import { useState } from 'react'
-import { useRouter } from 'next/router'
-import axios from 'axios'
+import { useState } from "react";
 
-export default function CreateCourse(){
-  const [title, setTitle] = useState('')
-  const [desc, setDesc] = useState('')
-  const [resources, setResources] = useState([]) // {type, src, name}
-  const [file, setFile] = useState(null)
-  const router = useRouter()
+export default function CreateCourse() {
+  const [title, setTitle] = useState("");
+  const [desc, setDesc] = useState("");
+  const [tags, setTags] = useState("");
 
-  function addYoutube(){ const url = prompt('Paste YouTube URL'); if(url) setResources(r=>[...r,{type:'youtube',src:url,name:'YouTube'}]) }
-  function pickFile(e){ setFile(e.target.files[0]) }
+  const [thumbnail, setThumbnail] = useState("");
+  const [video, setVideo] = useState("");
 
-  async function uploadFileToServer(file){
-    const reader = new FileReader()
-    return new Promise((resolve,reject)=>{
-      reader.onload = async () => {
-        const base = reader.result.split(',')[1]
-        const resp = await axios.post('/api/upload', { filename: Date.now() + '_' + file.name, contentBase64: base })
-        resolve(resp.data.url)
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
-  }
+  const [testURL, setTestURL] = useState("");
+  const [msg, setMsg] = useState("");
 
-  async function submit(e){
-    e.preventDefault()
-    let resList = resources.slice()
-    if(file){
-      try{
-        const url = await uploadFileToServer(file)
-        const type = file.type.includes('video') ? 'mp4' : 'pdf'
-        resList.push({ type, src: url, name: file.name })
-      }catch(e){ alert('Upload failed'); return }
-    }
-    const courses = JSON.parse(localStorage.getItem('lms_courses')||'[]')
-    const id = courses.length ? Math.max(...courses.map(c=>c.id))+1 : 1
-    courses.push({ id, title, description: desc, resources: resList })
-    localStorage.setItem('lms_courses', JSON.stringify(courses))
-    router.push('/admin/dashboard')
+  // -----------------------------
+  // HANDLE THUMBNAIL FILE UPLOAD
+  // -----------------------------
+  const handleThumbnailUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => setThumbnail(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  // -----------------------------
+  // HANDLE COURSE VIDEO UPLOAD
+  // -----------------------------
+  const handleVideoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => setVideo(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  function createCourse(e) {
+    e.preventDefault();
+
+    const newCourse = {
+      id: Date.now(),
+      title,
+      description: desc,
+      tags: tags.split(",").map((t) => t.trim()),
+      thumbnail,
+      video,
+      testURL,
+    };
+
+    const existing = JSON.parse(localStorage.getItem("courses") || "[]");
+    existing.push(newCourse);
+    localStorage.setItem("courses", JSON.stringify(existing));
+
+    setMsg("✅ Course created successfully!");
+
+    setTitle("");
+    setDesc("");
+    setTags("");
+    setThumbnail("");
+    setVideo("");
+    setTestURL("");
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">Create Course</h2>
-      <form onSubmit={submit} className="space-y-3">
-        <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Title" className="w-full p-2 border rounded" />
-        <textarea value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Description" className="w-full p-2 border rounded" />
-        <div className="flex gap-2">
-          <button type="button" onClick={addYoutube} className="px-3 py-1 border rounded">Add YouTube URL</button>
-          <input type="file" onChange={pickFile} />
-        </div>
+    <div className="max-w-3xl mx-auto mt-10 p-8 bg-white dark:bg-gray-800 shadow-xl rounded-xl">
+      <h1 className="text-3xl font-bold text-center mb-6 dark:text-white">
+        Create New Course
+      </h1>
+
+      <form onSubmit={createCourse} className="space-y-6">
+
+        {/* Title */}
         <div>
-          <h4 className="font-semibold">Resources</h4>
-          <ul className="mt-2 space-y-1">
-            {resources.map((r,i)=>(<li key={i}>{r.name || r.src}</li>))}
-          </ul>
+          <label className="font-medium text-gray-700 dark:text-gray-200">Course Title</label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-3 border rounded-lg mt-1 bg-white dark:bg-gray-700 dark:text-white"
+            placeholder="React Basics"
+            required
+          />
         </div>
-        <button className="px-3 py-1 bg-indigo-600 text-white rounded">Create</button>
+
+        {/* Description */}
+        <div>
+          <label className="font-medium text-gray-700 dark:text-gray-200">Course Description</label>
+          <textarea
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            rows={4}
+            className="w-full p-3 border rounded-lg mt-1 bg-white dark:bg-gray-700 dark:text-white"
+            placeholder="Short course description..."
+            required
+          />
+        </div>
+
+        {/* Tags */}
+        <div>
+          <label className="font-medium text-gray-700 dark:text-gray-200">
+            Tags (comma separated)
+          </label>
+          <input
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            className="w-full p-3 border rounded-lg mt-1 bg-white dark:bg-gray-700 dark:text-white"
+            placeholder="javascript, react, frontend"
+          />
+        </div>
+
+        {/* Thumbnail Upload */}
+        <div>
+          <label className="font-medium text-gray-700 dark:text-gray-200">
+            Upload Thumbnail
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleThumbnailUpload}
+            className="w-full mt-1"
+          />
+
+          {thumbnail && (
+            <img
+              src={thumbnail}
+              alt="Thumbnail preview"
+              className="mt-3 rounded-lg shadow w-40 h-24 object-cover"
+            />
+          )}
+        </div>
+
+        {/* VIDEO UPLOAD */}
+        <div>
+          <label className="font-medium text-gray-700 dark:text-gray-200">
+            Upload Course Video (Optional)
+          </label>
+          <input
+            type="file"
+            accept="video/mp4,video/webm"
+            onChange={handleVideoUpload}
+            className="w-full mt-1"
+          />
+
+          {video && (
+            <video
+              className="mt-3 rounded-lg shadow w-64"
+              src={video}
+              controls
+            />
+          )}
+        </div>
+
+        {/* Test URL */}
+        <div>
+          <label className="font-medium text-gray-700 dark:text-gray-200">
+            Test / Quiz URL (Paste any link)
+          </label>
+          <input
+            value={testURL}
+            onChange={(e) => setTestURL(e.target.value)}
+            className="w-full p-3 border rounded-lg mt-1 bg-white dark:bg-gray-700 dark:text-white"
+            placeholder="https://quiz.com/test-123"
+          />
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            You can paste Google forms, Typeform, YouTube quiz, or any link.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-lg shadow"
+        >
+          Create Course
+        </button>
+
+        {msg && (
+          <p className="text-center text-green-600 dark:text-green-400 font-medium mt-3">
+            {msg}
+          </p>
+        )}
       </form>
     </div>
-  )
+  );
 }

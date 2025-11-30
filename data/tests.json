@@ -1,0 +1,25 @@
+[
+    {
+        "id": "1",
+        "title": "React Basics Quiz",
+        "type": "mcq",
+        "questions": [
+            {
+                "q": "What is JSX?",
+                "options": [
+                    "A library",
+                    "A syntax extension",
+                    "A component",
+                    "None"
+                ],
+                "answer": 1
+            }
+        ]
+    },
+    {
+        "id": "2",
+        "title": "Advanced React Test",
+        "type": "url",
+        "url": "https://google.com"
+    }
+]

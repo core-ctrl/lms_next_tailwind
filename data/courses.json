@@ -1,17 +1,22 @@
 [
   {
-    "id": 1,
-    "title": "Intro to Web Dev",
-    "description": "HTML, CSS, JavaScript fundamentals."
-  },
-  {
-    "id": 2,
+    "id": "react-basics",
     "title": "React Basics",
-    "description": "Components, props, state, hooks."
+    "description": "Learn the fundamentals of React including components, hooks, and props.",
+    "tags": [
+      "React",
+      "Frontend",
+      "JavaScript"
+    ]
   },
   {
-    "id": 3,
-    "title": "Next.js & Tailwind",
-    "description": "Build production-ready frontends."
+    "id": "nextjs-master",
+    "title": "Next.js Mastery",
+    "description": "Routing, SSR, API routes, and modern Next.js features.",
+    "tags": [
+      "Next.js",
+      "SSR",
+      "Web Dev"
+    ]
   }
 ]

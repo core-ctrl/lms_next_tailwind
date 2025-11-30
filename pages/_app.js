@@ -1,20 +1,20 @@
-import '../styles/globals.css'
-import { AuthProvider } from '../context/AuthContext'
-import Navbar from '../components/Navbar'
-import { Provider } from 'react-redux'
-import { store } from '../store/store'
+import { ThemeProvider } from "@/context/ThemeContext";
+import { AuthProvider } from "@/context/AuthContext";
+import { UIProvider } from "@/context/UIContext";
+import Navbar from "@/components/layout/Navbar";
+import "@/styles/globals.css";
 
-export default function App({ Component, pageProps }) {
+export default function MyApp({ Component, pageProps }) {
   return (
-    <Provider store={store}>
+    <ThemeProvider>
       <AuthProvider>
-        <div className="min-h-screen flex flex-col">
-          <Navbar />
-          <main className="flex-1 container mx-auto px-4 py-6">
+        <UIProvider>
+          <div className="min-h-screen bg-white dark:bg-gray-900 transition">
+            <Navbar />
             <Component {...pageProps} />
-          </main>
-        </div>
+          </div>
+        </UIProvider>
       </AuthProvider>
-    </Provider>
-  )
+    </ThemeProvider>
+  );
 }

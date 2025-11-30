@@ -1,74 +1,109 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from "react";
 
-const AuthContext = createContext()
+export const AuthContext = createContext();
 
-// default admin stored in localStorage under 'lms_admin'
-const DEFAULT_ADMIN = { email: 'admin@lms.com', password: 'admin123' }
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
 
-export function AuthProvider({ children }){
-  const [user, setUser] = useState(null)
-  const [role, setRole] = useState(null)
+  // Load session on refresh
+  useEffect(() => {
+    const saved = localStorage.getItem("user");
+    if (saved) setUser(JSON.parse(saved));
+  }, []);
 
-  useEffect(()=>{
-    // load auth
-    try{
-      const raw = localStorage.getItem('lms_auth')
-      if(raw){
-        const a = JSON.parse(raw)
-        setUser(a.user)
-        setRole(a.role)
-      }
-      // ensure admin creds exist
-      const adm = localStorage.getItem('lms_admin')
-      if(!adm) localStorage.setItem('lms_admin', JSON.stringify(DEFAULT_ADMIN))
-    }catch(e){}
-  },[])
+  // Save login session
+  const saveSession = (data) => {
+    localStorage.setItem("user", JSON.stringify(data));
+    setUser(data);
+  };
 
-  function loginStudent(payload){
-    const auth = { role: 'student', user: payload }
-    setUser(payload)
-    setRole('student')
-    localStorage.setItem('lms_auth', JSON.stringify(auth))
-  }
-
-  function loginAdmin(email, password){
-    try{
-      const adm = JSON.parse(localStorage.getItem('lms_admin') || JSON.stringify(DEFAULT_ADMIN))
-      if(email === adm.email && password === adm.password){
-        const auth = { role: 'admin', user: { email } }
-        setUser({ email })
-        setRole('admin')
-        localStorage.setItem('lms_auth', JSON.stringify(auth))
-        return { ok: true }
-      }else{
-        return { ok: false, message: 'Invalid credentials' }
-      }
-    }catch(e){
-      return { ok: false, message: 'Error reading admin data' }
+  // --------------------------
+  // STUDENT REGISTER
+  // --------------------------
+  const registerStudent = (name, password) => {
+    if (!name || !password) {
+      return { ok: false, message: "All fields are required" };
     }
-  }
 
-  function logout(){
-    setUser(null); setRole(null)
-    localStorage.removeItem('lms_auth')
-  }
+    // Strong password rule
+    const rule = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  function changeAdminPassword(newPass){
-    try{
-      const adm = JSON.parse(localStorage.getItem('lms_admin') || JSON.stringify(DEFAULT_ADMIN))
-      adm.password = newPass
-      localStorage.setItem('lms_admin', JSON.stringify(adm))
-      return { ok: true }
-    }catch(e){
-      return { ok: false }
+    if (!rule.test(password)) {
+      return {
+        ok: false,
+        message: "Password must be 8+ chars, 1 uppercase, 1 number.",
+      };
     }
-  }
+
+    const newStudent = {
+      name,
+      password,
+      role: "student",
+    };
+
+    // Save student account separately
+    localStorage.setItem("studentAccount", JSON.stringify(newStudent));
+
+    return { ok: true };
+  };
+
+  // --------------------------
+  // STUDENT LOGIN
+  // --------------------------
+  const loginStudent = (name, password) => {
+    const saved = JSON.parse(localStorage.getItem("studentAccount"));
+
+    if (!saved) {
+      return { ok: false, message: "No student found. Please sign up." };
+    }
+
+    if (saved.name !== name || saved.password !== password) {
+      return { ok: false, message: "Incorrect name or password." };
+    }
+
+    // Save session
+    saveSession(saved);
+    return { ok: true };
+  };
+
+  // --------------------------
+  // ADMIN LOGIN
+  // --------------------------
+  const loginAdmin = (email, password) => {
+    if (email === "admin@lms.com" && password === "Admin123") {
+      const admin = { email, role: "admin" };
+      saveSession(admin);
+      return { ok: true };
+    }
+    return { ok: false, message: "Invalid admin credentials." };
+  };
+
+  // --------------------------
+  // LOGOUT
+  // --------------------------
+  const logout = () => {
+    localStorage.removeItem("user"); // CLEAR ONLY ACTIVE SESSION
+    setUser(null);
+
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, role, loginStudent, loginAdmin, logout, changeAdminPassword }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        registerStudent,
+        loginStudent,
+        loginAdmin,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
-export const useAuth = () => useContext(AuthContext)
+// Hook
+export const useAuth = () => useContext(AuthContext);
